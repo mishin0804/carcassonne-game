@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>雙人卡卡頌</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 20px;
+  background: #e9e4d8;
+  color: #38352d;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+h1 { margin: 10px 0; }
+.info { margin: 12px; font-weight: bold; }
+.game {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(38px, 65px));
+  gap: 3px;
+  background: #777;
+  padding: 4px;
+  border-radius: 6px;
+}
+.cell {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #d8d1bd;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: clamp(18px, 4vw, 30px);
+}
+.cell:hover { outline: 2px solid #b58b40; }
+.tile {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: inherit;
+}
+.grass { background: #a7bd78; }
+.road { background: #d6bc82; }
+.city { background: #8997a8; }
+.start { background: #a7bd78; }
+.panel {
+  background: white;
+  padding: 18px;
+  border-radius: 10px;
+  min-width: 190px;
+}
+.preview {
+  width: 100px;
+  height: 100px;
+  margin: 15px auto;
+  display: grid;
+  place-items: center;
+  font-size: 48px;
+  border: 3px solid #777;
+  border-radius: 5px;
+}
+button.action {
+  padding: 10px 16px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
+  background: #536b49;
+  color: white;
+  cursor: pointer;
+}
+button.action:disabled { opacity: .4; cursor: default; }
+@media(max-width:500px) {
+  body { padding: 8px; }
+  .board {
+    grid-template-columns: repeat(7, minmax(35px, 1fr));
+    width: 100%;
+  }
+  .game { gap: 12px; }
+  .panel { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<h1>雙人卡卡頌</h1>
+<div class="info" id="turn">目前玩家：玩家 1</div>
+
+<div class="game">
+  <div class="board" id="board"></div>
+
+  <div class="panel">
+    <h3>目前地圖片塊</h3>
+    <div class="preview grass" id="preview">🌳</div>
+    <p id="tileName">草地</p>
+    <button class="action" onclick="rotate()">旋轉 90°</button>
+    <button class="action" onclick="drawTile()">抽取下一塊</button>
+    <p id="message">請選擇棋盤上的空格放置</p>
+    <hr>
+    <p>玩家 1：<span id="score1">0</span> 分</p>
+    <p>玩家 2：<span id="score2">0</span> 分</p>
+    <button class="action" onclick="restart()">重新開始</button>
+  </div>
+</div>
+
+<script>
+const SIZE = 7;
+const board = Array.from({length: SIZE}, () =>
+  Array(SIZE).fill(null)
+);
+
+const tiles = [
+  {type:"grass", name:"草地", icon:"🌳"},
+  {type:"road", name:"道路", icon:"🛤️"},
+  {type:"city", name:"城市", icon:"🏰"}
+];
+
+let currentPlayer = 1;
+let currentTile = tiles[0];
+let rotation = 0;
+let score = [0,0];
+
+board[3][3] = {
+  type:"grass",
+  icon:"🌳",
+  rotation:0,
+  start:true
+};
+
+function render() {
+  const el = document.getElementById("board");
+  el.innerHTML = "";
+
+  board.forEach((row,r) => {
+    row.forEach((tile,c) => {
+      const cell = document.createElement("button");
+      cell.className = "cell";
+
+      if(tile) {
+        cell.innerHTML = `
+          <div class="tile ${tile.type}"
+            style="transform:rotate(${tile.rotation}deg)">
+            ${tile.icon}
+          </div>`;
+      } else {
+        cell.textContent = "";
+        cell.onclick = () => placeTile(r,c);
+      }
+
+      el.appendChild(cell);
+    });
+  });
+
+  document.getElementById("turn").textContent =
+    "目前玩家：玩家 " + currentPlayer;
+  document.getElementById("score1").textContent = score[0];
+  document.getElementById("score2").textContent = score[1];
+}
+
+function rotate() {
+  rotation = (rotation + 90) % 360;
+  document.getElementById("preview").style.transform =
+    `rotate(${rotation}deg)`;
+}
+
+function drawTile() {
+  const index = Math.floor(Math.random() * tiles.length);
+  currentTile = tiles[index];
+  rotation = 0;
+
+  const preview = document.getElementById("preview");
+  preview.className = "preview " + currentTile.type;
+  preview.textContent = currentTile.icon;
+  preview.style.transform = "rotate(0deg)";
+
+  document.getElementById("tileName").textContent =
+    currentTile.name;
+  document.getElementById("message").textContent =
+    "請放置 " + currentTile.name;
+}
+
+function placeTile(r,c) {
+  if(board[r][c]) return;
+
+  const neighbors = [
+    [r-1,c], [r+1,c], [r,c-1], [r,c+1]
+  ];
+
+  const hasNeighbor = neighbors.some(([nr,nc]) =>
+    nr >= 0 && nr < SIZE &&
+    nc >= 0 && nc < SIZE &&
+    board[nr][nc]
+  );
+
+  if(!hasNeighbor) {
+    document.getElementById("message").textContent =
+      "地圖片塊必須連接已有地圖！";
+    return;
+  }
+
+  board[r][c] = {
+    ...currentTile,
+    rotation
+  };
+
+  score[currentPlayer-1]++;
+
+  currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+  document.getElementById("message").textContent =
+    "放置成功！換下一位玩家。";
+
+  drawTile();
+  render();
+}
+
+function restart() {
+  board.forEach(row => row.fill(null));
+  board[3][3] = {
+    type:"grass",
+    icon:"🌳",
+    rotation:0,
+    start:true
+  };
+  currentPlayer = 1;
+  score = [0,0];
+  drawTile();
+  render();
+}
+
+drawTile();
+render();
+</script>
+
+</body>
+</html>
