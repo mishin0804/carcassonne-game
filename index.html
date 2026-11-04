@@ -3,244 +3,1044 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>雙人卡卡頌</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小鎮物語｜雙人拼圖桌遊</title>
 <style>
 * { box-sizing: border-box; }
+
+:root {
+  --grass: #a9c879;
+  --road: #d9bd83;
+  --city: #b7a17b;
+  --water: #79c6db;
+  --ink: #554b39;
+}
+
 body {
   margin: 0;
-  padding: 20px;
-  background: #e9e4d8;
-  color: #38352d;
-  font-family: Arial, sans-serif;
+  background: #eee9dc;
+  color: var(--ink);
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+header {
+  padding: 18px 12px 12px;
   text-align: center;
 }
-h1 { margin: 10px 0; }
-.info { margin: 12px; font-weight: bold; }
-.game {
+
+h1 {
+  margin: 0;
+  font-size: 27px;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  color: #8b806d;
+  font-size: 12px;
+  margin-top: 7px;
+}
+
+.status {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  gap: 10px;
   flex-wrap: wrap;
-  align-items: flex-start;
+  margin: 12px;
 }
-.board {
+
+.pill {
+  background: white;
+  border-radius: 20px;
+  padding: 7px 15px;
+  font-size: 13px;
+  box-shadow: 0 2px 5px #0000000c;
+}
+
+.layout {
   display: grid;
-  grid-template-columns: repeat(7, minmax(38px, 65px));
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  max-width: 1200px;
+  margin: auto;
+  padding: 10px 16px 30px;
+}
+
+.map-panel {
+  min-width: 0;
+  background: #ded8c9;
+  border: 5px solid #d1c7b4;
+  border-radius: 12px;
+  overflow: auto;
+  min-height: 490px;
+  max-height: 76vh;
+  position: relative;
+}
+
+.map {
+  display: grid;
+  width: max-content;
+  margin: auto;
+  padding: 60px;
   gap: 3px;
-  background: #777;
-  padding: 4px;
-  border-radius: 6px;
+  align-content: center;
+  justify-content: center;
 }
+
 .cell {
-  width: 100%;
-  aspect-ratio: 1;
-  background: #d8d1bd;
-  border: none;
+  width: 76px;
+  height: 76px;
   padding: 0;
-  cursor: pointer;
-  font-size: clamp(18px, 4vw, 30px);
+  border: 0;
+  background: transparent;
+  border-radius: 5px;
+  position: relative;
 }
-.cell:hover { outline: 2px solid #b58b40; }
-.tile {
+
+.cell.occupied {
+  background: #d5cbb8;
+}
+
+.cell.candidate {
+  background: #c9d9a9;
+  outline: 2px dashed #789657;
+  cursor: pointer;
+}
+
+.cell.candidate:hover {
+  background: #b9d394;
+  transform: scale(1.035);
+  z-index: 2;
+}
+
+.cell.invalid {
+  background: #e2c7b6;
+  outline: 1px dashed #b77e63;
+  cursor: not-allowed;
+}
+
+.tile-art {
   width: 100%;
   height: 100%;
+  display: block;
+  border-radius: 4px;
+  filter: drop-shadow(0 2px 2px #554b3930);
+}
+
+.cell.occupied .tile-art {
+  border: 1px solid #887c66;
+}
+
+.tile-art.preview {
+  width: 150px;
+  height: 150px;
+  margin: auto;
+  border: 2px solid #8b806d;
+  border-radius: 8px;
+}
+
+.side {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: inherit;
+  flex-direction: column;
+  gap: 12px;
 }
-.grass { background: #a7bd78; }
-.road { background: #d6bc82; }
-.city { background: #8997a8; }
-.start { background: #a7bd78; }
-.panel {
-  background: white;
-  padding: 18px;
-  border-radius: 10px;
-  min-width: 190px;
+
+.card {
+  background: #fffdf8;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px #0000000b;
 }
-.preview {
-  width: 100px;
-  height: 100px;
-  margin: 15px auto;
+
+.card h3 {
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+
+.preview-box {
+  text-align: center;
+  background: #eee9dc;
+  padding: 12px;
+  border-radius: 9px;
+}
+
+.tile-name {
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.tile-count {
+  color: #8b806d;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.actions {
   display: grid;
-  place-items: center;
-  font-size: 48px;
-  border: 3px solid #777;
-  border-radius: 5px;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 12px;
 }
+
 button.action {
-  padding: 10px 16px;
-  margin: 5px;
-  border: none;
-  border-radius: 6px;
-  background: #536b49;
+  border: 0;
+  border-radius: 7px;
+  padding: 11px 8px;
+  background: #687e4d;
   color: white;
   cursor: pointer;
+  font-size: 13px;
 }
-button.action:disabled { opacity: .4; cursor: default; }
-@media(max-width:500px) {
-  body { padding: 8px; }
-  .board {
-    grid-template-columns: repeat(7, minmax(35px, 1fr));
-    width: 100%;
+
+button.action:hover { background: #50663a; }
+
+button.action:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: #b6a27d;
+}
+
+.message {
+  background: #f1ecdf;
+  border-radius: 7px;
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  min-height: 54px;
+  margin-top: 10px;
+}
+
+.player {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 5px;
+  border-bottom: 1px solid #eee7d9;
+  font-size: 13px;
+}
+
+.player.active {
+  color: #55733d;
+  font-weight: bold;
+}
+
+.inventory {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.inventory-item {
+  background: #f0ebdf;
+  border-radius: 5px;
+  padding: 6px 2px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.inventory-item b {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.inventory-item.empty {
+  opacity: .35;
+}
+
+.legend {
+  font-size: 12px;
+  line-height: 2;
+  color: #766b58;
+}
+
+.legend span {
+  margin-right: 8px;
+}
+
+@media(max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 8px;
   }
-  .game { gap: 12px; }
-  .panel { width: 100%; }
+
+  .map-panel {
+    min-height: 390px;
+    max-height: 62vh;
+  }
+
+  .cell {
+    width: 58px;
+    height: 58px;
+  }
+
+  .map { padding: 35px; }
+
+  .tile-art.preview {
+    width: 130px;
+    height: 130px;
+  }
+
+  h1 { font-size: 22px; }
 }
 </style>
 </head>
+
 <body>
 
-<h1>雙人卡卡頌</h1>
-<div class="info" id="turn">目前玩家：玩家 1</div>
+<header>
+  <h1>小鎮物語</h1>
+  <div class="subtitle">A LITTLE WORLD OF TILES · 雙人拼圖桌遊</div>
+</header>
 
-<div class="game">
-  <div class="board" id="board"></div>
-
-  <div class="panel">
-    <h3>目前地圖片塊</h3>
-    <div class="preview grass" id="preview">🌳</div>
-    <p id="tileName">草地</p>
-    <button class="action" onclick="rotate()">旋轉 90°</button>
-    <button class="action" onclick="drawTile()">抽取下一塊</button>
-    <p id="message">請選擇棋盤上的空格放置</p>
-    <hr>
-    <p>玩家 1：<span id="score1">0</span> 分</p>
-    <p>玩家 2：<span id="score2">0</span> 分</p>
-    <button class="action" onclick="restart()">重新開始</button>
-  </div>
+<div class="status">
+  <div class="pill" id="phase">河流階段</div>
+  <div class="pill" id="turn">玩家 1 的回合</div>
+  <div class="pill" id="remaining">剩餘 11 塊</div>
 </div>
 
-<script>
-const SIZE = 7;
-const board = Array.from({length: SIZE}, () =>
-  Array(SIZE).fill(null)
-);
+<main class="layout">
 
-const tiles = [
-  {type:"grass", name:"草地", icon:"🌳"},
-  {type:"road", name:"道路", icon:"🛤️"},
-  {type:"city", name:"城市", icon:"🏰"}
+  <section class="map-panel">
+    <div class="map" id="map"></div>
+  </section>
+
+  <aside class="side">
+
+    <section class="card">
+      <h3>目前抽到的地圖片塊</h3>
+
+      <div class="preview-box">
+        <div id="preview"></div>
+        <div class="tile-name" id="tileName">準備中</div>
+        <div class="tile-count" id="tileInfo"></div>
+      </div>
+
+      <div class="actions">
+        <button class="action" onclick="rotateTile()">
+          ↻ 旋轉 90°
+        </button>
+        <button class="action secondary" onclick="resetRotation()">
+          重設方向
+        </button>
+      </div>
+
+      <div class="message" id="message">
+        請選擇地圖周圍的綠色空格放置。
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>玩家資訊</h3>
+      <div class="player active" id="player1">
+        <span>玩家 1</span>
+        <span id="score1">0 塊</span>
+      </div>
+      <div class="player" id="player2">
+        <span>玩家 2</span>
+        <span id="score2">0 塊</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>地圖庫存</h3>
+      <div class="legend">
+        河流地圖：12 種，各 1 塊<br>
+        一般地圖：25 種，共 72 塊
+      </div>
+      <div class="inventory" id="inventory"></div>
+    </section>
+
+    <section class="card">
+      <h3>地形圖例</h3>
+      <div class="legend">
+        <span>🟩 草地</span>
+        <span>🟨 道路</span><br>
+        <span>🏰 城市</span>
+        <span>🌊 河流</span>
+      </div>
+      <button class="action secondary"
+        style="width:100%;margin-top:12px"
+        onclick="newGame()">
+        重新開始
+      </button>
+    </section>
+
+  </aside>
+</main>
+
+<script>
+
+// ======================================
+// 1. 地圖片塊資料
+// 邊緣順序：北、東、南、西
+// F = 草地 / R = 道路 / C = 城市 / W = 河流
+// ======================================
+
+const riverTemplates = [
+  {id:"river01", name:"河流源頭", edges:["F","W","F","F"], art:"river"},
+  {id:"river02", name:"直線河流", edges:["F","W","F","W"], art:"river"},
+  {id:"river03", name:"彎曲河流 A", edges:["F","W","W","F"], art:"river"},
+  {id:"river04", name:"彎曲河流 B", edges:["W","W","F","F"], art:"river"},
+  {id:"river05", name:"蜿蜒河流", edges:["F","F","W","W"], art:"river"},
+  {id:"river06", name:"河流轉彎", edges:["W","F","F","W"], art:"river"},
+  {id:"river07", name:"河流直行", edges:["W","F","W","F"], art:"river"},
+  {id:"river08", name:"河流彎道", edges:["F","W","W","F"], art:"river"},
+  {id:"river09", name:"河流彎道", edges:["W","W","F","F"], art:"river"},
+  {id:"river10", name:"河流直行", edges:["W","F","W","F"], art:"river"},
+  {id:"river11", name:"河流轉彎", edges:["F","F","W","W"], art:"river"},
+  {id:"river12", name:"河流湖泊", edges:["F","F","F","F"], art:"lake"}
 ];
 
-let currentPlayer = 1;
-let currentTile = tiles[0];
-let rotation = 0;
-let score = [0,0];
+// 一般地圖 25 種。
+// 數量按照使用者提供的參考圖片。
+// 總數 72 塊。
 
-board[3][3] = {
-  type:"grass",
-  icon:"🌳",
-  rotation:0,
-  start:true
+const tileTemplates = [
+  {id:1, name:"小教堂草地", count:4, edges:["F","F","F","F"], art:"chapel"},
+  {id:2, name:"村莊教堂", count:2, edges:["F","F","F","F"], art:"chapel2"},
+  {id:3, name:"四面城牆", count:1, edges:["C","C","C","C"], art:"city"},
+  {id:4, name:"三面城市", count:3, edges:["C","C","C","F"], art:"city"},
+  {id:5, name:"城堡城市", count:1, edges:["C","C","C","C"], art:"city2"},
+  {id:6, name:"城市道路", count:1, edges:["C","R","C","F"], art:"cityroad"},
+  {id:7, name:"盾牌城市道路", count:2, edges:["C","R","C","F"], art:"cityroad"},
+  {id:8, name:"城市邊緣", count:3, edges:["C","F","F","F"], art:"city"},
+  {id:9, name:"城牆草地", count:2, edges:["C","F","F","F"], art:"city2"},
+  {id:10, name:"城市與道路", count:3, edges:["C","F","R","F"], art:"cityroad"},
+  {id:11, name:"盾牌城市與道路", count:2, edges:["C","F","R","F"], art:"cityroad"},
+  {id:12, name:"城市轉角 A", count:1, edges:["C","C","F","F"], art:"city"},
+  {id:13, name:"盾牌城市轉角", count:2, edges:["C","C","F","F"], art:"city2"},
+  {id:14, name:"城市轉角 B", count:2, edges:["C","C","F","F"], art:"cityroad"},
+  {id:15, name:"城市邊界", count:3, edges:["C","F","F","F"], art:"city"},
+  {id:16, name:"城市草原", count:5, edges:["C","F","F","F"], art:"city2"},
+  {id:17, name:"直線道路 A", count:3, edges:["F","R","F","R"], art:"road"},
+  {id:18, name:"直線道路 B", count:3, edges:["F","R","F","R"], art:"road2"},
+  {id:19, name:"道路轉彎", count:3, edges:["F","R","R","F"], art:"road"},
+  {id:20, name:"道路十字路口", count:3, edges:["R","R","R","R"], art:"crossroad"},
+  {id:21, name:"道路直線 C", count:3, edges:["F","R","F","R"], art:"road2"},
+  {id:22, name:"道路三岔口", count:8, edges:["R","R","F","R"], art:"crossroad"},
+  {id:23, name:"道路彎道", count:9, edges:["F","R","R","F"], art:"road"},
+  {id:24, name:"道路村莊", count:4, edges:["F","R","F","R"], art:"village"},
+  {id:25, name:"小村莊道路", count:1, edges:["F","R","F","R"], art:"village"}
+];
+
+const COLORS = {
+  F:"#a9c879",
+  R:"#d9bd83",
+  C:"#b7a17b",
+  W:"#79c6db"
 };
 
-function render() {
-  const el = document.getElementById("board");
-  el.innerHTML = "";
+// ======================================
+// 2. 遊戲狀態
+// ======================================
 
-  board.forEach((row,r) => {
-    row.forEach((tile,c) => {
-      const cell = document.createElement("button");
-      cell.className = "cell";
+let board = new Map();
+let riverDeck = [];
+let mainDeck = [];
+let currentTile = null;
+let rotation = 0;
+let currentPlayer = 1;
+let scores = [0,0];
+let phase = "river";
+let gameOver = false;
 
-      if(tile) {
-        cell.innerHTML = `
-          <div class="tile ${tile.type}"
-            style="transform:rotate(${tile.rotation}deg)">
-            ${tile.icon}
-          </div>`;
-      } else {
-        cell.textContent = "";
-        cell.onclick = () => placeTile(r,c);
-      }
+// ======================================
+// 3. 洗牌
+// ======================================
 
-      el.appendChild(cell);
-    });
+function shuffle(array) {
+  const result = [...array];
+
+  for(let i=result.length-1;i>0;i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [result[i],result[j]] = [result[j],result[i]];
+  }
+
+  return result;
+}
+
+function createMainDeck() {
+  const deck = [];
+
+  tileTemplates.forEach(tile => {
+    for(let i=0;i<tile.count;i++) {
+      deck.push({...tile, copy:i+1});
+    }
   });
 
-  document.getElementById("turn").textContent =
-    "目前玩家：玩家 " + currentPlayer;
-  document.getElementById("score1").textContent = score[0];
-  document.getElementById("score2").textContent = score[1];
+  return shuffle(deck);
 }
 
-function rotate() {
-  rotation = (rotation + 90) % 360;
-  document.getElementById("preview").style.transform =
-    `rotate(${rotation}deg)`;
+// ======================================
+// 4. 座標及邊緣旋轉
+// ======================================
+
+function key(x,y) {
+  return x+","+y;
 }
 
-function drawTile() {
-  const index = Math.floor(Math.random() * tiles.length);
-  currentTile = tiles[index];
-  rotation = 0;
+function rotateEdges(edges,times) {
+  let result = [...edges];
 
-  const preview = document.getElementById("preview");
-  preview.className = "preview " + currentTile.type;
-  preview.textContent = currentTile.icon;
-  preview.style.transform = "rotate(0deg)";
+  for(let i=0;i<times;i++) {
+    result = [
+      result[3],
+      result[0],
+      result[1],
+      result[2]
+    ];
+  }
 
-  document.getElementById("tileName").textContent =
-    currentTile.name;
-  document.getElementById("message").textContent =
-    "請放置 " + currentTile.name;
+  return result;
 }
 
-function placeTile(r,c) {
-  if(board[r][c]) return;
+function rotatedTile(tile,turns) {
+  return rotateEdges(tile.edges,turns);
+}
 
-  const neighbors = [
-    [r-1,c], [r+1,c], [r,c-1], [r,c+1]
+// ======================================
+// 5. 原創 SVG 地圖片塊繪製
+// ======================================
+
+function createSVG(tile,turns=0) {
+
+  const edges = tile.edges;
+
+  let drawings = `
+    <rect x="0" y="0" width="100" height="100"
+      fill="#a9c879"/>
+    <path d="M0 25 Q20 17 40 28 T100 22"
+      fill="none" stroke="#91b765" stroke-width="2" opacity=".5"/>
+    <path d="M0 80 Q30 70 55 84 T100 75"
+      fill="none" stroke="#91b765" stroke-width="2" opacity=".5"/>
+  `;
+
+  // 草地小花與石子
+  for(let i=0;i<8;i++) {
+    const x = 10 + ((i*37+13)%80);
+    const y = 10 + ((i*29+21)%80);
+
+    drawings += `
+      <circle cx="${x}" cy="${y}" r="1.7"
+        fill="${i%2 ? "#f4e6a5":"#718f51"}"
+        opacity=".75"/>
+    `;
+  }
+
+  // 城市邊緣：四邊各自繪製城牆
+  const cityParts = [
+    [0,0,100,17],
+    [83,0,17,100],
+    [0,83,100,17],
+    [0,0,17,100]
   ];
 
-  const hasNeighbor = neighbors.some(([nr,nc]) =>
-    nr >= 0 && nr < SIZE &&
-    nc >= 0 && nc < SIZE &&
-    board[nr][nc]
-  );
+  edges.forEach((edge,i) => {
+    if(edge !== "C") return;
 
-  if(!hasNeighbor) {
-    document.getElementById("message").textContent =
-      "地圖片塊必須連接已有地圖！";
+    const [x,y,w,h] = cityParts[i];
+
+    drawings += `
+      <rect x="${x}" y="${y}" width="${w}" height="${h}"
+        fill="#b6a080" stroke="#78684e" stroke-width="2"/>
+      <path d="${
+        i===0 ? "M0 8 H100" :
+        i===1 ? "M91 0 V100" :
+        i===2 ? "M0 91 H100" :
+        "M8 0 V100"
+      }"
+        stroke="#e5d2a5" stroke-width="3"
+        stroke-dasharray="5 4"/>
+    `;
+  });
+
+  // 道路：依照道路邊緣連接中心
+  const roadPaths = [
+    "M50 50 Q49 27 50 0",
+    "M50 50 Q73 49 100 50",
+    "M50 50 Q51 73 50 100",
+    "M50 50 Q27 51 0 50"
+  ];
+
+  const roads = edges
+    .map((e,i)=>e==="R"?i:-1)
+    .filter(i=>i>=0);
+
+  if(roads.length>0) {
+    roads.forEach(i=>{
+      drawings += `
+        <path d="${roadPaths[i]}"
+          fill="none" stroke="#b68e56"
+          stroke-width="17" stroke-linecap="round"/>
+        <path d="${roadPaths[i]}"
+          fill="none" stroke="#ead3a0"
+          stroke-width="12" stroke-linecap="round"/>
+      `;
+    });
+  }
+
+  // 道路中心小裝飾
+  if(roads.length>0) {
+    drawings += `
+      <circle cx="50" cy="50" r="9"
+        fill="#c9a36b" stroke="#a27d4d" stroke-width="2"/>
+    `;
+  }
+
+  // 河流：水道連接各個 W 邊緣
+  const waters = edges
+    .map((e,i)=>e==="W"?i:-1)
+    .filter(i=>i>=0);
+
+  const waterPaths = [
+    "M50 50 Q44 25 50 0",
+    "M50 50 Q75 44 100 50",
+    "M50 50 Q56 75 50 100",
+    "M50 50 Q25 56 0 50"
+  ];
+
+  waters.forEach(i=>{
+    drawings += `
+      <path d="${waterPaths[i]}"
+        fill="none" stroke="#4f9fbd"
+        stroke-width="20" stroke-linecap="round"/>
+      <path d="${waterPaths[i]}"
+        fill="none" stroke="#a6e4ec"
+        stroke-width="14" stroke-linecap="round"/>
+      <path d="${waterPaths[i]}"
+        fill="none" stroke="#ffffff"
+        stroke-width="2" stroke-dasharray="4 7"
+        opacity=".6"/>
+    `;
+  });
+
+  if(tile.art==="lake") {
+    drawings += `
+      <ellipse cx="50" cy="50" rx="32" ry="24"
+        fill="#4f9fbd" stroke="#a6e4ec" stroke-width="5"/>
+      <path d="M25 50 Q40 39 53 49 T76 48"
+        fill="none" stroke="#ffffff" stroke-width="3"/>
+      <path d="M35 59 Q50 52 65 59"
+        fill="none" stroke="#ffffff" stroke-width="2"/>
+    `;
+  }
+
+  // 教堂及村莊
+  if(["chapel","chapel2","village"].includes(tile.art)) {
+    const roof = tile.art==="chapel2" ? "#a94f39":"#bc6748";
+
+    drawings += `
+      <rect x="32" y="35" width="36" height="30"
+        rx="2" fill="#e8d5a6" stroke="#806947" stroke-width="2"/>
+      <path d="M27 38 L50 19 L73 38 Z"
+        fill="${roof}" stroke="#774c37" stroke-width="2"/>
+      <rect x="44" y="47" width="12" height="18"
+        fill="#795e45"/>
+      <rect x="59" y="43" width="5" height="8"
+        fill="#8cb8c0"/>
+      <path d="M50 19 V10 M45 14 H55"
+        stroke="#806947" stroke-width="2"/>
+    `;
+
+    if(tile.art==="village") {
+      drawings += `
+        <rect x="12" y="17" width="19" height="17"
+          fill="#ecd7a7" stroke="#806947"/>
+        <path d="M9 18 L21 7 L34 18"
+          fill="#b85c43" stroke="#774c37" stroke-width="2"/>
+      `;
+    }
+  }
+
+  // 城市內部建築
+  if(["city","city2","cityroad"].includes(tile.art)) {
+    drawings += `
+      <rect x="34" y="31" width="32" height="31"
+        fill="#e7d5ad" stroke="#806947" stroke-width="2"/>
+      <path d="M29 34 L50 17 L71 34 Z"
+        fill="#b85c43" stroke="#774c37" stroke-width="2"/>
+      <rect x="45" y="45" width="10" height="17"
+        fill="#795e45"/>
+    `;
+
+    if(tile.art==="city2") {
+      drawings += `
+        <rect x="66" y="20" width="17" height="30"
+          fill="#e5d2a8" stroke="#806947" stroke-width="2"/>
+        <path d="M63 22 L74 10 L86 22 Z"
+          fill="#b85c43" stroke="#774c37" stroke-width="2"/>
+      `;
+    }
+  }
+
+  if(tile.art==="crossroad") {
+    drawings += `
+      <circle cx="50" cy="50" r="5"
+        fill="#b28b57" stroke="#876b45"/>
+    `;
+  }
+
+  const angle = turns*90;
+
+  return `
+    <svg class="tile-art" viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg">
+      <g transform="rotate(${angle} 50 50)">
+        ${drawings}
+      </g>
+      <rect x="1" y="1" width="98" height="98"
+        fill="none" stroke="#7b7951" stroke-width="2"/>
+    </svg>
+  `;
+}
+
+// ======================================
+// 6. 相鄰位置與合法性
+// ======================================
+
+const directions = [
+  {dx:0,dy:-1,side:0,opposite:2},
+  {dx:1,dy:0,side:1,opposite:3},
+  {dx:0,dy:1,side:2,opposite:0},
+  {dx:-1,dy:0,side:3,opposite:1}
+];
+
+function getCandidates() {
+
+  const candidates = new Set();
+
+  for(const [position] of board) {
+    const [x,y] = position.split(",").map(Number);
+
+    directions.forEach(d=>{
+      const nx=x+d.dx;
+      const ny=y+d.dy;
+      const k=key(nx,ny);
+
+      if(!board.has(k)) candidates.add(k);
+    });
+  }
+
+  return [...candidates];
+}
+
+function canPlace(x,y,turns) {
+
+  if(board.has(key(x,y))) return false;
+
+  const edges = rotateEdges(currentTile.edges,turns);
+  let neighborCount = 0;
+
+  for(const d of directions) {
+    const nx=x+d.dx;
+    const ny=y+d.dy;
+    const neighbor=board.get(key(nx,ny));
+
+    if(!neighbor) continue;
+
+    neighborCount++;
+
+    const neighborEdges = rotateEdges(
+      neighbor.tile.edges,
+      neighbor.rotation
+    );
+
+    if(edges[d.side] !== neighborEdges[d.opposite]) {
+      return false;
+    }
+  }
+
+  return neighborCount>0;
+}
+
+function getValidRotations(x,y) {
+  return [0,1,2,3].filter(
+    turns=>canPlace(x,y,turns)
+  );
+}
+
+// ======================================
+// 7. 抽取地圖片塊
+// ======================================
+
+function drawNextTile() {
+
+  if(phase==="river" && riverDeck.length===0) {
+    phase="normal";
+  }
+
+  if(phase==="river") {
+    currentTile=riverDeck.shift();
+  } else {
+    currentTile=mainDeck.shift();
+  }
+
+  rotation=0;
+
+  if(!currentTile) {
+    gameOver=true;
     return;
   }
 
-  board[r][c] = {
-    ...currentTile,
-    rotation
-  };
-
-  score[currentPlayer-1]++;
-
-  currentPlayer = currentPlayer === 1 ? 2 : 1;
-
-  document.getElementById("message").textContent =
-    "放置成功！換下一位玩家。";
-
-  drawTile();
-  render();
+  updateInterface();
 }
 
-function restart() {
-  board.forEach(row => row.fill(null));
-  board[3][3] = {
-    type:"grass",
-    icon:"🌳",
+function updateInterface() {
+
+  document.getElementById("phase").textContent =
+    phase==="river" ? "河流階段" : "一般地圖階段";
+
+  document.getElementById("turn").textContent =
+    "玩家 "+currentPlayer+" 的回合";
+
+  document.getElementById("remaining").textContent =
+    "剩餘 "+(riverDeck.length+mainDeck.length+1)+" 塊";
+
+  document.getElementById("preview").innerHTML =
+    createSVG(currentTile,rotation);
+
+  document.getElementById("tileName").textContent =
+    currentTile.name;
+
+  document.getElementById("tileInfo").textContent =
+    phase==="river"
+      ? "河流專屬地圖片塊"
+      : "編號 "+currentTile.id+" · 庫存 "+currentTile.count+" 塊";
+
+  document.getElementById("score1").textContent =
+    scores[0]+" 塊";
+
+  document.getElementById("score2").textContent =
+    scores[1]+" 塊";
+
+  document.getElementById("player1").classList.toggle(
+    "active",currentPlayer===1
+  );
+
+  document.getElementById("player2").classList.toggle(
+    "active",currentPlayer===2
+  );
+
+  renderInventory();
+}
+
+// ======================================
+// 8. 旋轉
+// ======================================
+
+function rotateTile() {
+  if(gameOver || !currentTile) return;
+
+  rotation=(rotation+1)%4;
+
+  updateInterface();
+  renderMap();
+
+  showMessage("目前旋轉角度："+rotation*90+"°");
+}
+
+function resetRotation() {
+  rotation=0;
+  updateInterface();
+  renderMap();
+}
+
+// ======================================
+// 9. 放置地圖
+// ======================================
+
+function placeTile(x,y) {
+
+  if(gameOver || !currentTile) return;
+
+  const validRotations=getValidRotations(x,y);
+
+  if(validRotations.length===0) {
+    showMessage("這個位置無法放置。請選擇其他綠色空格。");
+    return;
+  }
+
+  if(!validRotations.includes(rotation)) {
+    rotation=validRotations[0];
+    updateInterface();
+    renderMap();
+
+    showMessage(
+      "已自動調整為合法方向 "+rotation*90+"°，請再次點擊確認放置。"
+    );
+
+    return;
+  }
+
+  board.set(key(x,y),{
+    tile:currentTile,
+    rotation:rotation,
+    player:currentPlayer
+  });
+
+  scores[currentPlayer-1]++;
+
+  currentPlayer=currentPlayer===1?2:1;
+
+  drawNextTile();
+  renderMap();
+
+  if(gameOver) {
+    showMessage("所有地圖片塊已放置完成！");
+  } else {
+    showMessage("放置成功！現在輪到玩家 "+currentPlayer+"。");
+  }
+}
+
+// ======================================
+// 10. 地圖自由延伸顯示
+// ======================================
+
+function renderMap() {
+
+  const map=document.getElementById("map");
+  map.innerHTML="";
+
+  const candidates=getCandidates();
+
+  const positions=[
+    ...board.keys(),
+    ...candidates
+  ];
+
+  const coords=positions.map(k=>k.split(",").map(Number));
+
+  const minX=Math.min(...coords.map(p=>p[0]))-1;
+  const maxX=Math.max(...coords.map(p=>p[0]))+1;
+  const minY=Math.min(...coords.map(p=>p[1]))-1;
+  const maxY=Math.max(...coords.map(p=>p[1]))+1;
+
+  map.style.gridTemplateColumns=
+    `repeat(${maxX-minX+1}, 76px)`;
+
+  for(let y=minY;y<=maxY;y++) {
+    for(let x=minX;x<=maxX;x++) {
+
+      const cell=document.createElement("button");
+      cell.className="cell";
+
+      const tileData=board.get(key(x,y));
+
+      if(tileData) {
+        cell.classList.add("occupied");
+        cell.innerHTML=createSVG(
+          tileData.tile,
+          tileData.rotation
+        );
+
+      } else if(candidates.includes(key(x,y))) {
+
+        const valid=getValidRotations(x,y);
+
+        if(valid.length>0) {
+          cell.classList.add("candidate");
+          cell.title="可放置";
+          cell.innerHTML=`
+            <span style="font-size:24px;color:#66864d">＋</span>
+          `;
+
+          cell.onclick=()=>placeTile(x,y);
+
+        } else {
+          cell.classList.add("invalid");
+          cell.title="目前地形不相容";
+          cell.innerHTML=`
+            <span style="font-size:18px;color:#ad806b">×</span>
+          `;
+          cell.disabled=true;
+        }
+
+      }
+
+      map.appendChild(cell);
+    }
+  }
+}
+
+// ======================================
+// 11. 庫存顯示
+// ======================================
+
+function renderInventory() {
+
+  const el=document.getElementById("inventory");
+  el.innerHTML="";
+
+  tileTemplates.forEach(template=>{
+
+    const remaining=mainDeck.filter(
+      tile=>tile.id===template.id
+    ).length;
+
+    const item=document.createElement("div");
+
+    item.className="inventory-item"+
+      (remaining===0?" empty":"");
+
+    item.innerHTML=`
+      <b>${remaining}</b>
+      #${template.id}
+    `;
+
+    item.title=template.name+"：剩餘 "+remaining+" 塊";
+
+    el.appendChild(item);
+  });
+}
+
+// ======================================
+// 12. 訊息
+// ======================================
+
+function showMessage(message) {
+  document.getElementById("message").textContent=message;
+}
+
+// ======================================
+// 13. 新遊戲
+// ======================================
+
+function newGame() {
+
+  board=new Map();
+
+  riverDeck=shuffle(riverTemplates.slice(1,11));
+
+  // 河流湖泊必須是最後一塊
+  riverDeck.push(riverTemplates[11]);
+
+  mainDeck=createMainDeck();
+
+  currentPlayer=1;
+  scores=[0,0];
+  phase="river";
+  gameOver=false;
+
+  // 起始河流地圖
+  board.set(key(0,0),{
+    tile:riverTemplates[0],
     rotation:0,
-    start:true
-  };
-  currentPlayer = 1;
-  score = [0,0];
-  drawTile();
-  render();
+    player:0
+  });
+
+  drawNextTile();
+  renderMap();
+
+  showMessage(
+    "遊戲開始！請放置第一塊河流地圖。"
+  );
 }
 
-drawTile();
-render();
-</script>
+newGame();
 
+</script>
 </body>
 </html>
